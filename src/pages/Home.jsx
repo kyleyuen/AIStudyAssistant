@@ -6,24 +6,34 @@ function Home() {
     { text: "Hello! I'm your study assistant.", isUser: false, time: "10:30 AM" }
   ]);
   
-  // State for input text - FIXED: setInpusText → setInputText
   const [inputText, setInputText] = useState('');
+  const [typing, setTyping] = useState(false);
   
   // Function to handle sending messages
   const handleSendMessage = () => {
-    if(inputText.trim() === '') return;
+    if (inputText.trim() === '') return;
 
     const newMessage = {
-      text: inputText,
-      isUser: true,
-      // FIXED: toLocateTimeString → toLocaleTimeString
-      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
-    }
+        text: inputText,
+        isUser: true,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
 
-    // FIXED: setMasages → setMessages
     setMessages([...messages, newMessage]);
     setInputText('');
-  };
+    setTyping(true); // Show typing indicator
+
+    // Simulate AI response after 2 seconds
+    setTimeout(() => {
+        const aiMessage = {
+            text: "This is a simulated response from the AI.",
+            isUser: false,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prevMessages => [...prevMessages, aiMessage]);
+        setTyping(false); // Hide typing indicator
+    }, 2000);
+};
   
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -39,7 +49,15 @@ function Home() {
           </div>
         <p className="text-xs text-gray-500 mt-1">{message.time}</p>
       </div>
-))}
+    ))}
+
+        {typing && (
+            <div className="mb-4 text-left">
+            <div className="p-3 rounded-lg inline-block bg-purple-100">
+            <p>AI is typing...</p>
+            </div>
+            </div>
+        )}
         
         {/* Input area */}
         <div className="flex mt-4">
