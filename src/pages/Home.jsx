@@ -1,38 +1,60 @@
 import { useState } from 'react';
+import { getAIResponse } from '../services/api';
 
 function Home() {
   // State for messages
   const [messages, setMessages] = useState([
-    { text: "Hello! I'm your study assistant.", isUser: false, time: "10:30 AM" }
+    { 
+        text: "Hello! I'm your study assistant.", 
+        isUser: false,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
   ]);
   
   const [inputText, setInputText] = useState('');
   const [typing, setTyping] = useState(false);
   
   // Function to handle sending messages
-  const handleSendMessage = () => {
-    if (inputText.trim() === '') return;
+  const handleSendMessage = async () => {
+  if (inputText.trim() === '') return;
 
-    const newMessage = {
-        text: inputText,
-        isUser: true,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  // Add user message
+  const newMessage = {
+    text: inputText,
+    isUser: true,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  setMessages([...messages, newMessage]);
+  setInputText('');
+  setTyping(true);
+
+  try {
+    // Get AI response
+    const aiText = await getAIResponse(inputText);
+    
+    // Add AI message
+    const aiMessage = {
+      text: aiText,
+      isUser: false,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-
-    setMessages([...messages, newMessage]);
-    setInputText('');
-    setTyping(true); // Show typing indicator
-
-    // Simulate AI response after 2 seconds
-    setTimeout(() => {
-        const aiMessage = {
-            text: "This is a simulated response from the AI.",
-            isUser: false,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prevMessages => [...prevMessages, aiMessage]);
-        setTyping(false); // Hide typing indicator
-    }, 2000);
+    
+    setMessages(prevMessages => [...prevMessages, aiMessage]);
+  } 
+  catch (error) {
+    // Handle error
+    const errorMessage = {
+      text: "Sorry, I'm having trouble connecting right now.",
+      isUser: false,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    setMessages(prevMessages => [...prevMessages, errorMessage]);
+  } 
+  finally {
+    setTyping(false);
+  }
 };
   
   return (
